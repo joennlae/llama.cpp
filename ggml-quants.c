@@ -37,8 +37,8 @@
 #endif
 #endif
 
-#ifdef __riscv_v_intrinsic
-#include <riscv_vector.h>
+#ifdef __riscv_th_v_intrinsic>
+#include <riscv_th_vector.h>
 #endif
 
 #undef MIN
@@ -783,32 +783,32 @@ void quantize_row_q8_0(const float * restrict x, void * restrict vy, int k) {
         _mm_storeu_si128((__m128i *)(y[i].qs + 16), ni4);
 #endif
     }
-#elif defined(__riscv_v_intrinsic)
+#elif defined(__riscv_th_v_intrinsic)
 
-    size_t vl = __riscv_vsetvl_e32m4(QK8_0);
+    size_t vl = __riscv_th_vsetvl_e32m4(QK8_0);
 
     for (int i = 0; i < nb; i++) {
         // load elements
-        vfloat32m4_t v_x   = __riscv_vle32_v_f32m4(x+i*QK8_0, vl);
+        vfloat32m4_t v_x   = __riscv_th_vle32_v_f32m4(x+i*QK8_0, vl);
 
-        vfloat32m4_t vfabs = __riscv_vfabs_v_f32m4(v_x, vl);
-        vfloat32m1_t tmp   = __riscv_vfmv_v_f_f32m1(0.0f, vl);
-        vfloat32m1_t vmax  = __riscv_vfredmax_vs_f32m4_f32m1(vfabs, tmp, vl);
-        float amax = __riscv_vfmv_f_s_f32m1_f32(vmax);
+        vfloat32m4_t vfabs = __riscv_th_vfabs_v_f32m4(v_x, vl);
+        vfloat32m1_t tmp   = __riscv_th_vfmv_v_f_f32m1(0.0f, vl);
+        vfloat32m1_t vmax  = __riscv_th_vfredmax_vs_f32m4_f32m1(vfabs, tmp, vl);
+        float amax = __riscv_th_vfmv_f_s_f32m1_f32(vmax);
 
         const float d = amax / ((1 << 7) - 1);
         const float id = d ? 1.0f/d : 0.0f;
 
         y[i].d = GGML_FP32_TO_FP16(d);
 
-        vfloat32m4_t x0 = __riscv_vfmul_vf_f32m4(v_x, id, vl);
+        vfloat32m4_t x0 = __riscv_th_vfmul_vf_f32m4(v_x, id, vl);
 
         // convert to integer
-        vint16m2_t   vi = __riscv_vfncvt_x_f_w_i16m2(x0, vl);
-        vint8m1_t    vs = __riscv_vncvt_x_x_w_i8m1(vi, vl);
+        vint16m2_t   vi = __riscv_th_vfncvt_x_f_w_i16m2(x0, vl);
+        vint8m1_t    vs = __riscv_th_vncvt_x_x_w_i8m1(vi, vl);
 
         // store result
-        __riscv_vse8_v_i8m1(y[i].qs , vs, vl);
+        __riscv_th_vse8_v_i8m1(y[i].qs , vs, vl);
     }
 #else
     GGML_UNUSED(nb);

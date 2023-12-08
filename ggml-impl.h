@@ -78,8 +78,8 @@ extern "C" {
 #endif
 #endif
 
-#ifdef __riscv_v_intrinsic
-#include <riscv_vector.h>
+#ifdef __riscv_th_v_intrinsic
+#include <riscv_th_vector.h>
 #endif
 
 #ifdef __F16C__
